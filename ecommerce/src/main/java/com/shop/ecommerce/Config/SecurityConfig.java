@@ -21,7 +21,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.shop.ecommerce.jwt.JwtAuthenticationFilter;
-
+import java.util.Arrays;
 import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
