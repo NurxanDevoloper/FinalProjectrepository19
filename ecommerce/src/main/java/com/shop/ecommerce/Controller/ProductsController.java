@@ -14,6 +14,8 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/products")
+// С помощью CrossOrigin мы разрешаем frontend использовать наши апи методы
+@CrossOrigin(origins = "http://localhost:3000")
 public class ProductsController {
 
     private final ProductsService productsService;
