@@ -5,6 +5,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,21 +21,29 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
+@CrossOrigin(origins = "http://127.0.0.1:5501") 
 public class Controller {
 
     @Autowired
     private UserService userService;
 
- 
+    /**
+     * Регистрация нового пользователя.
+     * Мы принимаем UserMeDto, так как в нем есть валидация и все нужные поля.
+     */
     @PostMapping("/register")
-    public ResponseEntity<User> register(@Valid @RequestBody User user) {
-        User savedUser = userService.register(user);
+    public ResponseEntity<User> register(@Valid @RequestBody UserMeDto userDto) {
+        // Контроллер просто передает DTO в сервис
+        User savedUser = userService.register(userDto);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(savedUser);
     }
 
- 
+    /**
+     * Вход пользователя.
+     * Возвращает JWT токен в формате JSON: {"token": "..."}
+     */
     @PostMapping("/login")
     public ResponseEntity<Map<String, String>> login(
             @Valid @RequestBody LoginRequestDto loginRequestDto) {
@@ -43,7 +52,9 @@ public class Controller {
         return ResponseEntity.ok(Map.of("token", token));
     }
 
- 
+    /**
+     * Получение данных текущего авторизованного пользователя.
+     */
     @GetMapping("/me")
     public ResponseEntity<UserMeDto> me() {
         return ResponseEntity.ok(userService.me());

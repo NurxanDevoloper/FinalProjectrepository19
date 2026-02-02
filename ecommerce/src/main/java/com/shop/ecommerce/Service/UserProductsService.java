@@ -1,7 +1,6 @@
 package com.shop.ecommerce.Service;
 
 import java.util.List;
-
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,11 +25,7 @@ public class UserProductsService {
     }
 
     private User getCurrentUser() {
-        String username = SecurityContextHolder
-                .getContext()
-                .getAuthentication()
-                .getName();
-
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
@@ -39,17 +34,7 @@ public class UserProductsService {
         User user = getCurrentUser();
 
         Products products = new Products();
-        products.setName(dto.getName());
-        products.setBrand(dto.getBrand());
-        products.setCategory(dto.getCategory());
-        products.setModel(dto.getModel());
-        products.setSize(dto.getSize());
-        products.setColor(dto.getColor());
-        products.setMaterial(dto.getMaterial());
-        products.setPrice(dto.getPrice());
-        products.setQuantity(dto.getQuantity());
-        products.setImgUrl(dto.getImgUrl());
-        products.setRating(dto.getRating());
+        mapDtoToEntity(dto, products);
         products.setOwnerId(user.getId());
 
         return productsRepository.save(products);
@@ -62,13 +47,33 @@ public class UserProductsService {
     public Products updateProducts(Long id, ProductsDto dto) {
         User user = getCurrentUser();
 
-        if (!productsRepository.existsByIdAndOwnerId(id, user.getId())) {
-            throw new RuntimeException("You can't update another user's product");
-        }
-
+        // Проверяем, существует ли продукт и принадлежит ли он юзеру
         Products products = productsRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
+        if (!products.getOwnerId().equals(user.getId())) {
+            throw new RuntimeException("You can't update another user's product");
+        }
+
+        mapDtoToEntity(dto, products);
+        return productsRepository.save(products);
+    }
+
+    public void deleteProducts(Long id) {
+        User user = getCurrentUser();
+        
+        Products products = productsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+
+        if (!products.getOwnerId().equals(user.getId())) {
+            throw new RuntimeException("You can't delete another user's product");
+        }
+
+        productsRepository.delete(products);
+    }
+
+    // Вспомогательный метод, чтобы не дублировать код
+    private void mapDtoToEntity(ProductsDto dto, Products products) {
         products.setName(dto.getName());
         products.setBrand(dto.getBrand());
         products.setCategory(dto.getCategory());
@@ -80,17 +85,5 @@ public class UserProductsService {
         products.setQuantity(dto.getQuantity());
         products.setImgUrl(dto.getImgUrl());
         products.setRating(dto.getRating());
-
-        return productsRepository.save(products);
-    }
-
-    public void deleteProducts(Long id) {
-        User user = getCurrentUser();
-
-        if (!productsRepository.existsByIdAndOwnerId(id, user.getId())) {
-            throw new RuntimeException("You can't delete another user's product");
-        }
-
-        productsRepository.deleteById(id);
     }
 }

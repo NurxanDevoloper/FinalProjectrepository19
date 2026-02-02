@@ -19,7 +19,6 @@ import jakarta.validation.constraints.Min;
 
 @RestController
 @RequestMapping("/basket")
-@CrossOrigin("*")
 @Validated
 public class BasketController {
 	   @Autowired

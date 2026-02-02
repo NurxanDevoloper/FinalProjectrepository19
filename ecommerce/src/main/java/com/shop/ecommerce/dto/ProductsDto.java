@@ -36,7 +36,6 @@ public class ProductsDto {
     private Integer quantity;
 
     @NotBlank
-    @Pattern(regexp = "^(http|https)://.*$")
     private String imgUrl;
 
     @NotNull
